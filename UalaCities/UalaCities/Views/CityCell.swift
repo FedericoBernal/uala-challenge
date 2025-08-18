@@ -28,6 +28,7 @@ struct CityCell: View {
                     .foregroundColor(.secondary)
                     .lineLimit(1)
             }
+            .contentShape(Rectangle())
             
             Spacer()
             
@@ -39,6 +40,7 @@ struct CityCell: View {
                         .foregroundColor(.blue)
                         .font(.title2)
                 }
+                .buttonStyle(PlainButtonStyle())
                 
                 // Favorite toggle button
                 Button(action: onFavoriteToggle) {
@@ -46,7 +48,9 @@ struct CityCell: View {
                         .foregroundColor(isFavorite ? .red : .secondary)
                         .font(.title2)
                 }
+                .buttonStyle(PlainButtonStyle())
             }
+            .allowsHitTesting(true)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)

@@ -107,6 +107,7 @@ struct CityListView: View {
                         RoundedRectangle(cornerRadius: 8)
                             .fill(shouldShowSelection && selectedCity?.id == city.id ? Color.blue.opacity(0.1) : Color.clear)
                     )
+                    .contentShape(Rectangle())
                     .onTapGesture {
                         onCityTap(city)
                     }
