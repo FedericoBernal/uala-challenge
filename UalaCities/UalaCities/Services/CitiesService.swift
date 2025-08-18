@@ -22,6 +22,10 @@ class CitiesService: ObservableObject {
     /// Cancellable for network request
     private var cancellable: AnyCancellable?
     
+    /// Retry count for failed requests
+    private var retryCount = 0
+    private let maxRetries = 3
+    
     init() {
         loadCities()
     }
@@ -38,6 +42,7 @@ class CitiesService: ObservableObject {
         }
         
         cancellable = URLSession.shared.dataTaskPublisher(for: url)
+            .timeout(.seconds(30), scheduler: DispatchQueue.main) // Add timeout
             .map(\.data)
             .decode(type: [City].self, decoder: JSONDecoder())
             .receive(on: DispatchQueue.main)
@@ -45,11 +50,11 @@ class CitiesService: ObservableObject {
                 receiveCompletion: { [weak self] completion in
                     self?.isLoading = false
                     if case .failure(let error) = completion {
-                        self?.error = error
+                        self?.handleError(error)
                     }
                 },
                 receiveValue: { [weak self] cities in
-                    // Sort cities for optimal search performance
+                    self?.retryCount = 0 // Reset retry count on success
                     self?.allCities = SearchAlgorithm.sortCities(cities)
                 }
             )
@@ -57,7 +62,25 @@ class CitiesService: ObservableObject {
     
     /// Reloads cities data
     func reloadCities() {
-        loadCities()
+        if retryCount < maxRetries {
+            retryCount += 1
+            loadCities()
+        } else {
+            error = NetworkError.maxRetriesExceeded
+            isLoading = false
+        }
+    }
+    
+    /// Handles errors with retry logic
+    private func handleError(_ error: Error) {
+        if retryCount < maxRetries {
+            // Auto-retry for certain errors
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                self.reloadCities()
+            }
+        } else {
+            self.error = error
+        }
     }
     
     /// Gets cities filtered by search criteria
@@ -84,6 +107,12 @@ class CitiesService: ObservableObject {
     func getTotalCitiesCount() -> Int {
         return allCities.count
     }
+    
+    /// Checks if cities are loaded
+    /// - Returns: True if cities are available
+    func hasCities() -> Bool {
+        return !allCities.isEmpty
+    }
 }
 
 // MARK: - Network Error
@@ -92,6 +121,8 @@ enum NetworkError: LocalizedError {
     case invalidURL
     case noData
     case decodingError
+    case timeout
+    case maxRetriesExceeded
     
     var errorDescription: String? {
         switch self {
@@ -101,6 +132,25 @@ enum NetworkError: LocalizedError {
             return "No data received"
         case .decodingError:
             return "Failed to decode data"
+        case .timeout:
+            return "Request timed out"
+        case .maxRetriesExceeded:
+            return "Maximum retry attempts exceeded"
+        }
+    }
+    
+    var recoverySuggestion: String? {
+        switch self {
+        case .invalidURL:
+            return "Please check the URL configuration"
+        case .noData:
+            return "Please check your internet connection and try again"
+        case .decodingError:
+            return "The data format has changed. Please update the app"
+        case .timeout:
+            return "The request is taking too long. Please try again"
+        case .maxRetriesExceeded:
+            return "Please check your connection and try again later"
         }
     }
 } 
