@@ -7,7 +7,12 @@ struct CityCell: View {
     let onFavoriteToggle: () -> Void
     let onInfoTap: () -> Void
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+    
     private var shouldShowSelection: Bool {
+        return horizontalSizeClass == .regular || 
+               (horizontalSizeClass == .compact && verticalSizeClass == .compact)
+    }
     
     var body: some View {
         HStack(spacing: 12) {
