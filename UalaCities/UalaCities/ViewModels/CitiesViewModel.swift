@@ -19,13 +19,6 @@ class CitiesViewModel: ObservableObject {
     }
     
     private func setupBindings() {
-        citiesService.$allCities
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.performSearch()
-            }
-            .store(in: &cancellables)
-        
         citiesService.$isLoading
             .receive(on: DispatchQueue.main)
             .assign(to: \.isLoading, on: self)
@@ -36,15 +29,32 @@ class CitiesViewModel: ObservableObject {
             .assign(to: \.error, on: self)
             .store(in: &cancellables)
         
+        citiesService.$allCities
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] cities in
+                guard let self = self else { return }
+                if !cities.isEmpty && self.searchText.isEmpty && !self.showFavoritesOnly {
+                    self.filteredCities = cities
+                } else if !cities.isEmpty {
+                    self.performSearch()
+                }
+            }
+            .store(in: &cancellables)
+        
         favoritesManager.$favoriteCityIds
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                self?.performSearch()
+                guard let self = self else { return }
+                if !self.citiesService.allCities.isEmpty {
+                    self.performSearch()
+                }
             }
             .store(in: &cancellables)
     }
     
     func performSearch() {
+        guard !citiesService.isLoading else { return }
+        
         filteredCities = citiesService.getFilteredCities(
             searchText: searchText,
             showFavoritesOnly: showFavoritesOnly,
@@ -54,12 +64,16 @@ class CitiesViewModel: ObservableObject {
     
     func updateSearchText(_ text: String) {
         searchText = text
-        performSearch()
+        DispatchQueue.main.async {
+            self.performSearch()
+        }
     }
     
     func toggleFavoritesOnly() {
         showFavoritesOnly.toggle()
-        performSearch()
+        DispatchQueue.main.async {
+            self.performSearch()
+        }
     }
     
     func toggleFavorite(_ city: City) {
@@ -84,7 +98,9 @@ class CitiesViewModel: ObservableObject {
     
     func clearSearch() {
         searchText = ""
-        performSearch()
+        DispatchQueue.main.async {
+            self.performSearch()
+        }
     }
     
     func getCitiesForSearch(_ searchText: String) -> [City] {

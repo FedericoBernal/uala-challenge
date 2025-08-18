@@ -66,7 +66,7 @@ struct CityDetailView: View {
                         
                         Spacer()
                         
-                        Button("Open in Maps") {
+                        Button("View in Map") {
                             onMapTap()
                         }
                         .buttonStyle(.bordered)
@@ -74,7 +74,13 @@ struct CityDetailView: View {
                     .padding(.horizontal)
                     
                     Map(coordinateRegion: $region, annotationItems: [city]) { city in
-                        MapMarker(coordinate: city.coordinate, tint: .red)
+                        MapAnnotation(coordinate: city.coordinate) {
+                            Image(systemName: "mappin.circle.fill")
+                                .font(.title)
+                                .foregroundColor(.red)
+                                .background(.white)
+                                .clipShape(Circle())
+                        }
                     }
                     .frame(height: 200)
                     .cornerRadius(12)

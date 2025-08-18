@@ -2,8 +2,16 @@ import SwiftUI
 
 struct CityListView: View {
     @ObservedObject var viewModel: CitiesViewModel
+    @Binding var selectedCity: City?
     let onCityTap: (City) -> Void
     let onCityInfoTap: (City) -> Void
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+    
+    private var shouldShowSelection: Bool {
+        return horizontalSizeClass == .regular || 
+               (horizontalSizeClass == .compact && verticalSizeClass == .compact)
+    }
     
     var body: some View {
         VStack(spacing: 0) {
@@ -85,6 +93,7 @@ struct CityListView: View {
                     CityCell(
                         city: city,
                         isFavorite: viewModel.isFavorite(city),
+                        isSelected: shouldShowSelection && selectedCity?.id == city.id,
                         onFavoriteToggle: {
                             viewModel.toggleFavorite(city)
                         },
@@ -94,6 +103,10 @@ struct CityListView: View {
                     )
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                    .listRowBackground(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(shouldShowSelection && selectedCity?.id == city.id ? Color.blue.opacity(0.1) : Color.clear)
+                    )
                     .onTapGesture {
                         onCityTap(city)
                     }
@@ -110,6 +123,7 @@ struct CityListView: View {
     NavigationView {
         CityListView(
             viewModel: CitiesViewModel(),
+            selectedCity: .constant(nil),
             onCityTap: { _ in },
             onCityInfoTap: { _ in }
         )

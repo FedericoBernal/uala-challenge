@@ -8,7 +8,6 @@ struct MapView: View {
     
     @State private var region: MKCoordinateRegion
     @State private var mapType: MKMapType = .standard
-    @State private var showCityInfo = false
     
     init(cities: [City], selectedCity: City? = nil, onCityTap: @escaping (City) -> Void) {
         self.cities = cities
@@ -145,6 +144,7 @@ struct CityAnnotationView: View {
                     .foregroundColor(isSelected ? .red : .blue)
                     .background(.white)
                     .clipShape(Circle())
+                    .shadow(radius: 2)
                 
                 if isSelected {
                     Text(city.name)
@@ -155,6 +155,7 @@ struct CityAnnotationView: View {
                         .background(.white)
                         .cornerRadius(4)
                         .shadow(radius: 2)
+                        .lineLimit(1)
                 }
             }
         }
