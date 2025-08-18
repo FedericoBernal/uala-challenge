@@ -9,52 +9,62 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var viewModel = CitiesViewModel()
+    @State private var selectedCity: City?
+    @State private var showingCityDetail = false
+    @State private var showingMap = false
     
     var body: some View {
         NavigationView {
-            VStack {
-                if viewModel.isLoading {
-                    ProgressView("Loading cities...")
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if let error = viewModel.error {
-                    VStack {
-                        Text("Error loading cities")
-                            .font(.headline)
-                        Text(error.localizedDescription)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Button("Retry") {
-                            viewModel.reloadCities()
-                        }
-                        .buttonStyle(.borderedProminent)
+            CityListView(
+                viewModel: viewModel,
+                onCityTap: { city in
+                    selectedCity = city
+                    showingMap = true
+                },
+                onCityInfoTap: { city in
+                    selectedCity = city
+                    showingCityDetail = true
+                }
+            )
+            .sheet(isPresented: $showingCityDetail) {
+                if let city = selectedCity {
+                    NavigationView {
+                        CityDetailView(
+                            city: city,
+                            isFavorite: viewModel.isFavorite(city),
+                            onFavoriteToggle: {
+                                viewModel.toggleFavorite(city)
+                            },
+                            onMapTap: {
+                                showingCityDetail = false
+                                showingMap = true
+                            }
+                        )
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    VStack {
-                        Text("Cities loaded: \(viewModel.getTotalCitiesCount())")
-                            .font(.headline)
-                            .padding()
-                        
-                        Text("Favorites: \(viewModel.getFavoritesCount())")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                        
-                        Button("Toggle Favorites Only") {
-                            viewModel.toggleFavoritesOnly()
-                        }
-                        .buttonStyle(.bordered)
-                        .padding()
-                        
-                        if viewModel.showFavoritesOnly {
-                            Text("Showing favorites only")
-                                .foregroundColor(.red)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
-            .navigationTitle("Uala Cities")
-            .navigationBarTitleDisplayMode(.large)
+            .sheet(isPresented: $showingMap) {
+                if let city = selectedCity {
+                    NavigationView {
+                        MapView(
+                            cities: viewModel.filteredCities,
+                            selectedCity: city,
+                            onCityTap: { tappedCity in
+                                selectedCity = tappedCity
+                            }
+                        )
+                        .navigationTitle("Map")
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .navigationBarTrailing) {
+                                Button("Done") {
+                                    showingMap = false
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         .environmentObject(viewModel)
     }

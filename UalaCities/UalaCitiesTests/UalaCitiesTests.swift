@@ -17,6 +17,8 @@ struct UalaCitiesTests {
     // Include our custom test suites
     static var allTests = [
         CityTests.self,
-        SearchAlgorithmTests.self
+        SearchAlgorithmTests.self,
+        CitiesViewModelTests.self,
+        FavoritesManagerTests.self
     ]
 }
