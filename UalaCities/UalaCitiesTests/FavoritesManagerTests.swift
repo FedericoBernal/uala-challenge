@@ -1,17 +1,28 @@
-import Testing
+import XCTest
 @testable import UalaCities
 
-struct FavoritesManagerTests {
+final class FavoritesManagerTests: XCTestCase {
     
-    @Test func testInitialState() throws {
-        let manager = FavoritesManager()
-        
-        #expect(manager.favoriteCityIds.count == 0)
-        #expect(manager.getFavoritesCount() == 0)
+    var favoritesManager: FavoritesManager!
+    
+    override func setUp() {
+        super.setUp()
+        UserDefaults.standard.removeObject(forKey: "FavoriteCityIds")
+        favoritesManager = FavoritesManager()
     }
     
-    @Test func testAddToFavorites() throws {
-        let manager = FavoritesManager()
+    override func tearDown() {
+        UserDefaults.standard.removeObject(forKey: "FavoriteCityIds")
+        favoritesManager = nil
+        super.tearDown()
+    }
+    
+    func testInitialState() throws {
+        XCTAssertEqual(favoritesManager.favoriteCityIds.count, 0)
+        XCTAssertEqual(favoritesManager.getFavoritesCount(), 0)
+    }
+    
+    func testAddToFavorites() throws {
         let testCity = City(
             id: 707860,
             country: "UA",
@@ -19,14 +30,13 @@ struct FavoritesManagerTests {
             coord: Coordinates(lon: 34.283333, lat: 44.549999)
         )
         
-        #expect(manager.isFavorite(testCity) == false)
-        manager.addToFavorites(testCity)
-        #expect(manager.isFavorite(testCity) == true)
-        #expect(manager.getFavoritesCount() == 1)
+        XCTAssertFalse(favoritesManager.isFavorite(testCity))
+        favoritesManager.addToFavorites(testCity)
+        XCTAssertTrue(favoritesManager.isFavorite(testCity))
+        XCTAssertEqual(favoritesManager.getFavoritesCount(), 1)
     }
     
-    @Test func testRemoveFromFavorites() throws {
-        let manager = FavoritesManager()
+    func testRemoveFromFavorites() throws {
         let testCity = City(
             id: 707860,
             country: "UA",
@@ -34,16 +44,15 @@ struct FavoritesManagerTests {
             coord: Coordinates(lon: 34.283333, lat: 44.549999)
         )
         
-        manager.addToFavorites(testCity)
-        #expect(manager.isFavorite(testCity) == true)
+        favoritesManager.addToFavorites(testCity)
+        XCTAssertTrue(favoritesManager.isFavorite(testCity))
         
-        manager.removeFromFavorites(testCity)
-        #expect(manager.isFavorite(testCity) == false)
-        #expect(manager.getFavoritesCount() == 0)
+        favoritesManager.removeFromFavorites(testCity)
+        XCTAssertFalse(favoritesManager.isFavorite(testCity))
+        XCTAssertEqual(favoritesManager.getFavoritesCount(), 0)
     }
     
-    @Test func testToggleFavorite() throws {
-        let manager = FavoritesManager()
+    func testToggleFavorite() throws {
         let testCity = City(
             id: 707860,
             country: "UA",
@@ -51,22 +60,18 @@ struct FavoritesManagerTests {
             coord: Coordinates(lon: 34.283333, lat: 44.549999)
         )
         
-        // Initially not favorite
-        #expect(manager.isFavorite(testCity) == false)
+        XCTAssertFalse(favoritesManager.isFavorite(testCity))
         
-        // Toggle to favorite
-        manager.toggleFavorite(testCity)
-        #expect(manager.isFavorite(testCity) == true)
-        #expect(manager.getFavoritesCount() == 1)
+        favoritesManager.toggleFavorite(testCity)
+        XCTAssertTrue(favoritesManager.isFavorite(testCity))
+        XCTAssertEqual(favoritesManager.getFavoritesCount(), 1)
         
-        // Toggle back to not favorite
-        manager.toggleFavorite(testCity)
-        #expect(manager.isFavorite(testCity) == false)
-        #expect(manager.getFavoritesCount() == 0)
+        favoritesManager.toggleFavorite(testCity)
+        XCTAssertFalse(favoritesManager.isFavorite(testCity))
+        XCTAssertEqual(favoritesManager.getFavoritesCount(), 0)
     }
     
-    @Test func testClearAllFavorites() throws {
-        let manager = FavoritesManager()
+    func testClearAllFavorites() throws {
         let testCity1 = City(
             id: 707860,
             country: "UA",
@@ -80,13 +85,13 @@ struct FavoritesManagerTests {
             coord: Coordinates(lon: -74.006, lat: 40.7128)
         )
         
-        manager.addToFavorites(testCity1)
-        manager.addToFavorites(testCity2)
-        #expect(manager.getFavoritesCount() == 2)
+        favoritesManager.addToFavorites(testCity1)
+        favoritesManager.addToFavorites(testCity2)
+        XCTAssertEqual(favoritesManager.getFavoritesCount(), 2)
         
-        manager.clearAllFavorites()
-        #expect(manager.getFavoritesCount() == 0)
-        #expect(manager.isFavorite(testCity1) == false)
-        #expect(manager.isFavorite(testCity2) == false)
+        favoritesManager.clearAllFavorites()
+        XCTAssertEqual(favoritesManager.getFavoritesCount(), 0)
+        XCTAssertFalse(favoritesManager.isFavorite(testCity1))
+        XCTAssertFalse(favoritesManager.isFavorite(testCity2))
     }
 } 

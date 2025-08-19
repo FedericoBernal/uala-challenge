@@ -1,53 +1,54 @@
-import Testing
+import XCTest
 @testable import UalaCities
 
-struct CitiesViewModelTests {
+final class CitiesViewModelTests: XCTestCase {
     
-    @Test func testInitialState() throws {
-        let viewModel = CitiesViewModel()
-        
-        #expect(viewModel.searchText == "")
-        #expect(viewModel.filteredCities.count == 0)
-        #expect(viewModel.showFavoritesOnly == false)
-        #expect(viewModel.isLoading == false)
-        #expect(viewModel.error == nil)
+    var viewModel: CitiesViewModel!
+    
+    override func setUp() {
+        super.setUp()
+        viewModel = CitiesViewModel()
     }
     
-    @Test func testUpdateSearchText() throws {
-        let viewModel = CitiesViewModel()
-        
+    override func tearDown() {
+        viewModel = nil
+        super.tearDown()
+    }
+    
+    func testInitialState() throws {
+        XCTAssertEqual(viewModel.searchText, "")
+        XCTAssertEqual(viewModel.filteredCities.count, 0)
+        XCTAssertFalse(viewModel.showFavoritesOnly)
+        XCTAssertFalse(viewModel.isLoading)
+        XCTAssertNil(viewModel.error)
+    }
+    
+    func testUpdateSearchText() throws {
         viewModel.updateSearchText("Test")
-        #expect(viewModel.searchText == "Test")
+        XCTAssertEqual(viewModel.searchText, "Test")
     }
     
-    @Test func testToggleFavoritesOnly() throws {
-        let viewModel = CitiesViewModel()
-        
-        #expect(viewModel.showFavoritesOnly == false)
+    func testToggleFavoritesOnly() throws {
+        XCTAssertFalse(viewModel.showFavoritesOnly)
         viewModel.toggleFavoritesOnly()
-        #expect(viewModel.showFavoritesOnly == true)
+        XCTAssertTrue(viewModel.showFavoritesOnly)
         viewModel.toggleFavoritesOnly()
-        #expect(viewModel.showFavoritesOnly == false)
+        XCTAssertFalse(viewModel.showFavoritesOnly)
     }
     
-    @Test func testClearSearch() throws {
-        let viewModel = CitiesViewModel()
-        
+    func testClearSearch() throws {
         viewModel.updateSearchText("Test")
-        #expect(viewModel.searchText == "Test")
+        XCTAssertEqual(viewModel.searchText, "Test")
         viewModel.clearSearch()
-        #expect(viewModel.searchText == "")
+        XCTAssertEqual(viewModel.searchText, "")
     }
     
-    @Test func testGetCitiesForSearch() throws {
-        let viewModel = CitiesViewModel()
-        
+    func testGetCitiesForSearch() throws {
         let results = viewModel.getCitiesForSearch("Test")
-        #expect(results.count >= 0) // Should return empty array initially
+        XCTAssertNotNil(results)
     }
     
-    @Test func testToggleFavorite() throws {
-        let viewModel = CitiesViewModel()
+    func testToggleFavorite() throws {
         let testCity = City(
             id: 707860,
             country: "UA",
@@ -55,29 +56,22 @@ struct CitiesViewModelTests {
             coord: Coordinates(lon: 34.283333, lat: 44.549999)
         )
         
-        // Initially not favorite
-        #expect(viewModel.isFavorite(testCity) == false)
+        XCTAssertFalse(viewModel.isFavorite(testCity))
         
-        // Toggle to favorite
         viewModel.toggleFavorite(testCity)
-        #expect(viewModel.isFavorite(testCity) == true)
+        XCTAssertTrue(viewModel.isFavorite(testCity))
         
-        // Toggle back to not favorite
         viewModel.toggleFavorite(testCity)
-        #expect(viewModel.isFavorite(testCity) == false)
+        XCTAssertFalse(viewModel.isFavorite(testCity))
     }
     
-    @Test func testGetTotalCitiesCount() throws {
-        let viewModel = CitiesViewModel()
-        
+    func testGetTotalCitiesCount() throws {
         let count = viewModel.getTotalCitiesCount()
-        #expect(count >= 0) // Should return 0 initially
+        XCTAssertEqual(count, 0)
     }
     
-    @Test func testGetFavoritesCount() throws {
-        let viewModel = CitiesViewModel()
-        
+    func testGetFavoritesCount() throws {
         let count = viewModel.getFavoritesCount()
-        #expect(count == 0) // Should return 0 initially
+        XCTAssertEqual(count, 0)
     }
 } 

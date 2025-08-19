@@ -5,20 +5,12 @@
 //  Created by Federico Bernal on 18/08/2025.
 //
 
-import Testing
+import XCTest
 @testable import UalaCities
 
-struct UalaCitiesTests {
+final class UalaCitiesTests: XCTestCase {
     
-    @Test func example() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+    func testExample() throws {
+        XCTAssertTrue(true)
     }
-    
-    // Include our custom test suites
-    static var allTests = [
-        CityTests.self,
-        SearchAlgorithmTests.self,
-        CitiesViewModelTests.self,
-        FavoritesManagerTests.self
-    ]
 }
