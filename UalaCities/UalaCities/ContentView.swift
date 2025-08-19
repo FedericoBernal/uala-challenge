@@ -55,32 +55,38 @@ struct ContentView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     if shouldShowSplitScreen {
-                        HStack(spacing: 0) {
-                            CityListView(
-                                viewModel: viewModel,
-                                selectedCity: $selectedCity,
-                                onCityTap: { city in
-                                    DispatchQueue.main.async {
+                        GeometryReader { geometry in
+                            HStack(spacing: 0) {
+                                CityListView(
+                                    viewModel: viewModel,
+                                    selectedCity: $selectedCity,
+                                    onCityTap: { city in
+                                        DispatchQueue.main.async {
+                                            selectedCity = city
+                                        }
+                                    },
+                                    onCityInfoTap: { city in
                                         selectedCity = city
+                                        showingCityDetail = true
                                     }
-                                },
-                                onCityInfoTap: { city in
-                                    selectedCity = city
-                                    showingCityDetail = true
-                                }
-                            )
-                            .frame(maxWidth: .infinity)
-                            
-                            MapView(
-                                cities: viewModel.filteredCities,
-                                selectedCity: selectedCity,
-                                onCityTap: { city in
-                                    DispatchQueue.main.async {
-                                        selectedCity = city
+                                )
+                                .frame(width: geometry.size.width * 0.4)
+                                
+                                Rectangle()
+                                    .fill(Color(.separator))
+                                    .frame(width: 1)
+                                
+                                MapView(
+                                    cities: viewModel.filteredCities,
+                                    selectedCity: selectedCity,
+                                    onCityTap: { city in
+                                        DispatchQueue.main.async {
+                                            selectedCity = city
+                                        }
                                     }
-                                }
-                            )
-                            .frame(maxWidth: .infinity)
+                                )
+                                .frame(width: geometry.size.width * 0.6)
+                            }
                         }
                     } else {
                         CityListView(
