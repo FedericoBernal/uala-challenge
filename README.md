@@ -21,13 +21,12 @@ The search implementation uses a **prefix-based search algorithm** optimized for
 - **Protocol-Oriented Design**: Flexible and testable architecture
 
 #### Data Management
-- **Local Storage**: Core Data for persistent favorites storage
+- **Local Storage**: UserDefaults for persistent favorites storage
 - **Memory Optimization**: Efficient data structures to handle large datasets
 - **Lazy Loading**: Cities loaded on-demand to maintain app performance
 
 #### UI/UX Considerations
 - **Responsive Design**: Adaptive layouts for portrait/landscape orientations
-- **Accessibility**: VoiceOver support and semantic markup
 - **Performance**: Smooth scrolling and real-time search updates
 
 ### Assumptions Made
@@ -35,3 +34,26 @@ The search implementation uses a **prefix-based search algorithm** optimized for
 2. Search performance is prioritized over initial load time
 3. Favorites are stored locally and persist between app launches
 4. Map integration uses Apple Maps for native iOS experience
+5. Accessibility is a priority for inclusive user experience
+
+## Code Structure
+
+### Architecture Overview
+The app follows the **MVVM (Model-View-ViewModel)** pattern with clear separation of concerns
+
+### Key Design Patterns
+
+#### **Reactive Programming**
+- **Combine framework** for data binding
+- **@Published properties** for automatic UI updates
+- **ObservableObject** for view model integration
+
+#### **Dependency Injection**
+- **Environment objects** for shared state
+- **Closure-based callbacks** for view communication
+- **Protocol-oriented design** for testability
+
+#### **State Management**
+- **Single source of truth** in ViewModels
+- **Immutable data models** with computed properties
+- **Local state** for UI-specific concerns
