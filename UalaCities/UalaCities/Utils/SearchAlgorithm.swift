@@ -30,7 +30,13 @@ class SearchAlgorithm {
         
         let lowercasedPrefix = prefix.lowercased()
         
-        // Find the starting index using binary search
+        if showFavoritesOnly {
+            return cities.filter { city in
+                favorites.contains(city.id) && 
+                city.name.lowercased().hasPrefix(lowercasedPrefix)
+            }
+        }
+        
         let startIndex = findStartingIndex(for: lowercasedPrefix, in: cities)
         
         // Collect all matching cities from the starting point
@@ -45,11 +51,6 @@ class SearchAlgorithm {
             // If we've moved past cities that could match the prefix, stop searching
             if !cityNameLowercased.hasPrefix(lowercasedPrefix) {
                 break
-            }
-            
-            // Apply favorites filter if needed
-            if showFavoritesOnly && !favorites.contains(city.id) {
-                continue
             }
             
             results.append(city)
