@@ -20,7 +20,7 @@ struct ContentView: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Group {
                 if viewModel.isLoading {
                     VStack {
@@ -100,24 +100,20 @@ struct ContentView: View {
                                 showingCityDetail = true
                             }
                         )
-                        .background(
-                            NavigationLink(
-                                destination: PortraitMapView(
+                        .navigationDestination(isPresented: Binding(
+                            get: { selectedCity != nil },
+                            set: { if !$0 { selectedCity = nil } }
+                        )) {
+                            if let city = selectedCity {
+                                PortraitMapView(
                                     cities: viewModel.filteredCities,
-                                    selectedCity: selectedCity,
+                                    selectedCity: city,
                                     onCityTap: { city in
                                         selectedCity = city
                                     }
-                                ),
-                                isActive: Binding(
-                                    get: { selectedCity != nil },
-                                    set: { if !$0 { selectedCity = nil } }
                                 )
-                            ) {
-                                EmptyView()
                             }
-                            .hidden()
-                        )
+                        }
                     }
                 }
             }
@@ -149,7 +145,7 @@ struct PortraitMapView: View {
     let cities: [City]
     let selectedCity: City?
     let onCityTap: (City) -> Void
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) var dismiss
     
     var body: some View {
         MapView(
@@ -163,7 +159,7 @@ struct PortraitMapView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: {
-                    presentationMode.wrappedValue.dismiss()
+                    dismiss()
                 }) {
                     HStack {
                         Image(systemName: "chevron.left")

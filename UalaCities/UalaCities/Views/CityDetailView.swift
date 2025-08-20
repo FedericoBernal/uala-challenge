@@ -7,7 +7,8 @@ struct CityDetailView: View {
     let onFavoriteToggle: () -> Void
     let onMapTap: () -> Void
     
-    @State private var region: MKCoordinateRegion
+    @State private var position: MapCameraPosition
+    @State private var isMapReady = false
     
     init(city: City, isFavorite: Bool, onFavoriteToggle: @escaping () -> Void, onMapTap: @escaping () -> Void) {
         self.city = city
@@ -17,10 +18,10 @@ struct CityDetailView: View {
         
         // Initialize map region centered on the city
         let coordinate = city.coordinate
-        self._region = State(initialValue: MKCoordinateRegion(
+        self._position = State(initialValue: .region(MKCoordinateRegion(
             center: coordinate,
             span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
-        ))
+        )))
     }
     
     var body: some View {
@@ -60,21 +61,12 @@ struct CityDetailView: View {
                 
                 // Map preview
                 VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Text("Location")
-                            .font(.headline)
-                        
-                        Spacer()
-                        
-                        Button("View in Map") {
-                            onMapTap()
-                        }
-                        .buttonStyle(.bordered)
-                    }
-                    .padding(.horizontal)
+                    Text("Location")
+                        .font(.headline)
+                        .padding(.horizontal)
                     
-                    Map(coordinateRegion: $region, annotationItems: [city]) { city in
-                        MapAnnotation(coordinate: city.coordinate) {
+                    Map(position: $position) {
+                        Annotation(city.name, coordinate: city.coordinate) {
                             Image(systemName: "mappin.circle.fill")
                                 .font(.title)
                                 .foregroundColor(.red)
@@ -85,6 +77,11 @@ struct CityDetailView: View {
                     .frame(height: 200)
                     .cornerRadius(12)
                     .padding(.horizontal)
+                    .onAppear {
+                        if !isMapReady {
+                            isMapReady = true
+                        }
+                    }
                 }
                 
                 // City details
@@ -104,41 +101,38 @@ struct CityDetailView: View {
                 
                 // Action buttons
                 VStack(spacing: 12) {
-                    Button("Get Directions") {
-                        openInMaps()
+                    Button(action: onMapTap) {
+                        HStack {
+                            Image(systemName: "map")
+                            Text("View on Map")
+                        }
+                        .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                    .frame(maxWidth: .infinity)
                     
-                    Button("Share City") {
-                        shareCity()
+                    Button(action: {
+                        let shareText = "Check out \(city.name), \(city.country) at coordinates: \(city.coordinatesString)"
+                        let activityVC = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
+                        
+                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                           let window = windowScene.windows.first {
+                            window.rootViewController?.present(activityVC, animated: true)
+                        }
+                    }) {
+                        HStack {
+                            Image(systemName: "square.and.arrow.up")
+                            Text("Share City")
+                        }
+                        .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
-                    .frame(maxWidth: .infinity)
                 }
                 .padding(.horizontal)
-                .padding(.bottom, 20)
             }
+            .padding(.vertical)
         }
-        .navigationTitle("City Details")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-    
-    private func openInMaps() {
-        let coordinate = city.coordinate
-        let mapItem = MKMapItem(placemark: MKPlacemark(coordinate: coordinate))
-        mapItem.name = city.displayName
-        mapItem.openInMaps(launchOptions: nil)
-    }
-    
-    private func shareCity() {
-        let text = "Check out \(city.displayName) at coordinates: \(city.coordinatesString)"
-        let activityVC = UIActivityViewController(activityItems: [text], applicationActivities: nil)
-        
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = windowScene.windows.first {
-            window.rootViewController?.present(activityVC, animated: true)
-        }
+        .navigationTitle(city.name)
+        .navigationBarTitleDisplayMode(.large)
     }
 }
 
@@ -149,15 +143,14 @@ struct DetailRow: View {
     var body: some View {
         HStack {
             Text(title)
+                .font(.subheadline)
                 .foregroundColor(.secondary)
                 .frame(width: 100, alignment: .leading)
             
             Text(value)
-                .fontWeight(.medium)
-            
-            Spacer()
+                .font(.subheadline)
+                .foregroundColor(.primary)
         }
-        .padding(.vertical, 4)
     }
 }
 

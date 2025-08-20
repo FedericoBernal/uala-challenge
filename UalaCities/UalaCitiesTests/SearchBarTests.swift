@@ -7,8 +7,6 @@ final class SearchBarTests: XCTestCase {
         let searchBar = SearchBar(
             searchText: .constant(""),
             showFavoritesOnly: .constant(false),
-            totalCitiesCount: 200000,
-            favoritesCount: 5,
             onSearchTextChanged: { _ in },
             onFavoritesToggle: {}
         )
@@ -20,8 +18,6 @@ final class SearchBarTests: XCTestCase {
         let searchBar = SearchBar(
             searchText: .constant("New York"),
             showFavoritesOnly: .constant(false),
-            totalCitiesCount: 200000,
-            favoritesCount: 5,
             onSearchTextChanged: { _ in },
             onFavoritesToggle: {}
         )
@@ -33,8 +29,6 @@ final class SearchBarTests: XCTestCase {
         let searchBar = SearchBar(
             searchText: .constant(""),
             showFavoritesOnly: .constant(true),
-            totalCitiesCount: 200000,
-            favoritesCount: 5,
             onSearchTextChanged: { _ in },
             onFavoritesToggle: {}
         )
@@ -42,12 +36,10 @@ final class SearchBarTests: XCTestCase {
         XCTAssertNotNil(searchBar)
     }
     
-    func testSearchBarWithHighCounts() throws {
+    func testSearchBarWithDifferentStates() throws {
         let searchBar = SearchBar(
-            searchText: .constant(""),
-            showFavoritesOnly: .constant(false),
-            totalCitiesCount: 999999,
-            favoritesCount: 999,
+            searchText: .constant("London"),
+            showFavoritesOnly: .constant(true),
             onSearchTextChanged: { _ in },
             onFavoritesToggle: {}
         )

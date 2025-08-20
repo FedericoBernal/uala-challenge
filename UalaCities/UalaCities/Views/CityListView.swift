@@ -19,8 +19,6 @@ struct CityListView: View {
             SearchBar(
                 searchText: $viewModel.searchText,
                 showFavoritesOnly: $viewModel.showFavoritesOnly,
-                totalCitiesCount: viewModel.getTotalCitiesCount(),
-                favoritesCount: viewModel.getFavoritesCount(),
                 onSearchTextChanged: { text in
                     viewModel.updateSearchText(text)
                 },

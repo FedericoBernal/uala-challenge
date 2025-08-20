@@ -3,8 +3,6 @@ import SwiftUI
 struct SearchBar: View {
     @Binding var searchText: String
     @Binding var showFavoritesOnly: Bool
-    let totalCitiesCount: Int
-    let favoritesCount: Int
     let onSearchTextChanged: (String) -> Void
     let onFavoritesToggle: () -> Void
     
@@ -16,8 +14,8 @@ struct SearchBar: View {
                     .foregroundColor(.secondary)
                 
                 TextField("Search cities...", text: $searchText)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .onChange(of: searchText) { newValue in
+                    .textFieldStyle(PlainTextFieldStyle())
+                    .onChange(of: searchText) { _, newValue in
                         onSearchTextChanged(newValue)
                     }
                 
@@ -31,51 +29,41 @@ struct SearchBar: View {
                     }
                 }
             }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(Color(.systemGray6))
+            .cornerRadius(10)
             
             // Favorites toggle and counts
             HStack {
                 Button(action: onFavoritesToggle) {
-                    HStack {
+                    HStack(spacing: 6) {
                         Image(systemName: showFavoritesOnly ? "heart.fill" : "heart")
                             .foregroundColor(showFavoritesOnly ? .red : .secondary)
                         Text(showFavoritesOnly ? "Show All" : "Favorites Only")
+                            .font(.subheadline)
                             .foregroundColor(showFavoritesOnly ? .red : .primary)
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(showFavoritesOnly ? .red : .secondary, lineWidth: 1)
-                    )
                 }
+                .buttonStyle(.bordered)
                 
                 Spacer()
                 
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text("Total: \(totalCitiesCount)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    if showFavoritesOnly {
-                        Text("Favorites: \(favoritesCount)")
-                            .font(.caption)
-                            .foregroundColor(.red)
-                    }
-                }
+                Text("\(searchText.isEmpty ? "All" : "Found") cities")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
         }
-        .padding(.horizontal)
-        .padding(.vertical, 8)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
         .background(Color(.systemBackground))
     }
 }
 
 #Preview {
     SearchBar(
-        searchText: .constant(""),
+        searchText: .constant("New York"),
         showFavoritesOnly: .constant(false),
-        totalCitiesCount: 200000,
-        favoritesCount: 5,
         onSearchTextChanged: { _ in },
         onFavoritesToggle: {}
     )
